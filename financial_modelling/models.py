@@ -78,6 +78,12 @@ class FinancialModel:
         if volatility is None:
             volatility = self.calculate_annualized_volatility()
 
+        # Handle Series case
+        if isinstance(volatility, pd.Series):
+            volatility = volatility.iloc[0] if len(volatility) > 0 else 0
+        if isinstance(annualized_return, pd.Series):
+            annualized_return = annualized_return.iloc[0] if len(annualized_return) > 0 else 0
+            
         if volatility == 0:
             return 0
         return (annualized_return - self.risk_free_rate) / volatility
@@ -92,9 +98,17 @@ class FinancialModel:
         """
         if annualized_return is None:
             annualized_return = self.calculate_annualized_return()
+        
+        # Handle Series case
+        if isinstance(annualized_return, pd.Series):
+            annualized_return = annualized_return.iloc[0] if len(annualized_return) > 0 else 0
 
         downside_returns = self.returns[self.returns < target_return]
         downside_volatility = downside_returns.std() * np.sqrt(252)
+        
+        # Handle Series case
+        if isinstance(downside_volatility, pd.Series):
+            downside_volatility = downside_volatility.iloc[0] if len(downside_volatility) > 0 else 0
 
         if downside_volatility == 0:
             return 0
